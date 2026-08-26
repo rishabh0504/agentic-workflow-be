@@ -6,13 +6,12 @@ from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
+from app.config import settings
 from app.repositories.tool_repo import ToolRepository
 from app.repositories.tool_operation_repo import ToolOperationRepository
 from app.runtime.tool_runtime import ToolRuntime
 
 router = APIRouter(prefix="/providers", tags=["Providers & LLM Infrastructure"])
-
-OLLAMA_BASE_URL = "http://localhost:11434"
 
 
 class OllamaGenerateRequest(BaseModel):
@@ -31,7 +30,7 @@ async def list_ollama_models() -> List[Dict[str, Any]]:
     """
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
-            resp = await client.get(f"{OLLAMA_BASE_URL}/api/tags")
+            resp = await client.get(f"{settings.OLLAMA_BASE_URL}/api/tags")
             if resp.status_code == 200:
                 data = resp.json()
                 models = data.get("models", [])
@@ -152,7 +151,7 @@ async def generate_ollama(
             if ollama_tools:
                 body["tools"] = ollama_tools
 
-            resp = await client.post(f"{OLLAMA_BASE_URL}/api/chat", json=body)
+            resp = await client.post(f"{settings.OLLAMA_BASE_URL}/api/chat", json=body)
             if resp.status_code != 200:
                 gen_body = {
                     "model": payload.model,
@@ -160,7 +159,7 @@ async def generate_ollama(
                     "system": system_prompt,
                     "stream": False,
                 }
-                gen_resp = await client.post(f"{OLLAMA_BASE_URL}/api/generate", json=gen_body)
+                gen_resp = await client.post(f"{settings.OLLAMA_BASE_URL}/api/generate", json=gen_body)
                 if gen_resp.status_code == 200:
                     return gen_resp.json()
                 raise HTTPException(status_code=resp.status_code, detail=f"Ollama error: {resp.text}")
@@ -235,7 +234,7 @@ async def generate_ollama(
                     "messages": messages,
                     "stream": False,
                 }
-                synth_resp = await client.post(f"{OLLAMA_BASE_URL}/api/chat", json=synth_body)
+                synth_resp = await client.post(f"{settings.OLLAMA_BASE_URL}/api/chat", json=synth_body)
                 if synth_resp.status_code == 200:
                     synth_data = synth_resp.json()
                     final_msg = synth_data.get("message", {}).get("content", "")

@@ -64,6 +64,9 @@ DATABASE_URL="postgresql+asyncpg://postgres:postgres@127.0.0.1:54322/postgres"
 SUPABASE_URL="http://127.0.0.1:54321"
 SUPABASE_SERVICE_ROLE_KEY="your_supabase_service_role_key_here"
 SUPABASE_ANON_KEY="your_supabase_anon_key_here"
+
+# Local LLM Infrastructure
+OLLAMA_BASE_URL="http://localhost:11434"
 ```
 
 ### 3. Run the Development Server

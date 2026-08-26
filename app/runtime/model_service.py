@@ -2,8 +2,7 @@ from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
 import httpx
 import json
-
-OLLAMA_BASE_URL = "http://localhost:11434"
+from app.config import settings
 
 
 class ModelToolCall(BaseModel):
@@ -71,7 +70,7 @@ class ModelService:
             body["tools"] = tools
 
         async with httpx.AsyncClient(timeout=timeout_s) as client:
-            resp = await client.post(f"{OLLAMA_BASE_URL}/api/chat", json=body)
+            resp = await client.post(f"{settings.OLLAMA_BASE_URL}/api/chat", json=body)
             if resp.status_code != 200:
                 raise RuntimeError(f"Ollama chat error (status {resp.status_code}): {resp.text}")
 
